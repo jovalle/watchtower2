@@ -110,14 +110,6 @@ services:
     hostname: jellyfin
     image: jellyfin/jellyfin
     labels:
-      - homepage.group=Media
-      - homepage.name=Jellyfin
-      - homepage.icon=jellyfin
-      - homepage.href=https://jellyfin.${DOMAIN}
-      - homepage.description=Alternative Media server
-      - homepage.widget.type=jellyfin
-      - homepage.widget.url=https://jellyfin.${DOMAIN}
-      - homepage.widget.key=${JELLYFIN_API_KEY}
       - traefik.enable=true
       - traefik.http.routers.jellyfin.rule=host(`jellyfin.${DOMAIN}`)
       - traefik.http.services.jellyfin.loadbalancer.server.port=8096
