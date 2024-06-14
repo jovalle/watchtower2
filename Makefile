@@ -32,8 +32,10 @@ SYSTEMD_UNIT := $(ROOT_DIR)/watchtower.service
 EXTRA_UP_ARGS := --remove-orphans
 
 install: ##@other Start and enable service
-	@scripts/install-packages.sh
-	@scripts/install-docker.sh
+	@apt update
+	@apt install -y curl
+	@curl -fsSL https://raw.githubusercontent.com/jovalle/mothership/main/scripts/install-packages.sh | sh
+	@curl -fsSL https://raw.githubusercontent.com/jovalle/mothership/main/scripts/install-docker.sh | sh
 	@ln -sf $(SYSTEMD_UNIT) /etc/systemd/system/watchtower.service
 	@systemctl daemon-reload
 	@systemctl start watchtower

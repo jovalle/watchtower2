@@ -10,25 +10,17 @@ An automated configuration of my HTPC.
 
 ## 📖 Overview
 
-Control center for my personal media (incl. ~2500 MP3s from the 90s and 00s). Powered by [terraform](https://terraform.io), [ansible](https://ansible.com), [docker](https://docker.com) and a few scripts.
+Control center for my personal media (incl. ~2500 MP3s from the 90s and 00s).
 
-## 🐳 Docker Compose
-
-At the heart of the project is Docker, Docker Compose v2 to be specific. Makes for easy deployment to, and management of, a singular host.
-
-See `docker-compose.yaml` for the services deployed.
-
+Extends [Mothership](https://github.com/jovalle/mothership)
 
 ## 🧰 Core Components
 
 - [Docker Socket Proxy](https://github.com/Tecnativa/docker-socket-proxy): Secured proxy for Homepage to watch Docker
-- [Homepage](https://gethomepage.dev): Easily configurable dashboard with plugins for numerous core components
-
-![image](https://github.com/jovalle/watchtower/assets/47045210/6c11573d-08c5-414c-8814-f11e244b796d)
-
 - [Jellyfin](https://jellyfin.org): Plex competitor. Currently running comparisons. One advantage for Jellyfin is the lack of a SaaS and support for more media types (comics, audiobooks)
 - [Node Exporter](https://github.com/prometheus/node_exporter): Presents host resource metrics to be consumed by Prometheus and displayed by Grafana
 - [Plex](https://plex.tv): Organizes and streams media
+- [Portainer](https://portainer.io): Web app for managing container stacks remotely
 - [Traefik](https://traefik.io): Reverse proxy for serving other components with HTTPS enabled URLs. Using Let's Encrypt for quick and easy HTTPS certificates.
 - [Watchtower](https://containrrr.dev/watchtower/): No relation. 😅 Keeps an eye on colocated containers and updates them while I'm (hopefully) sleeping.
 
@@ -48,35 +40,14 @@ PUID=1000
 TZ="America/New_York"
 
 # apps
-JELLYFIN_API_KEY=REDACTED
-LIDARR_API_KEY=REDACTED
-OVERSEER_API_KEY=REDACTED
 PLEX_API_KEY=REDACTED
 PORTAINER_API_KEY=REDACTED
-PROWLARR_API_KEY=REDACTED
-RADARR_API_KEY=REDACTED
-SONARR_API_KEY=REDACTED
-TAUTULLI_API_KEY=REDACTED
 
 # cloudflare
 CF_API_EMAIL=REDACTED
 CF_API_KEY=REDACTED
 
-# gluetun
-OPENVPN_USER=REDACTED
-OPENVPN_PASSWORD=REDACTED
-
-# grafana
-GRAFANA_USER=REDACTED
-GRAFANA_PASSWORD=REDACTED
-
-# qbittorrent
-QBITTORRENT_USER=REDACTED
-QBITTORRENT_PASSWORD=REDACTED
-
 # media
-BOOKS_PATH=/mnt/hulkpool/books
-DOWNLOADS_PATH=/mnt/hulkpool/downloads
 MISC_PATH=/mnt/hulkpool/misc
 MOVIES_PATH=/mnt/hulkpool/movies
 MUSIC_PATH=/mnt/hulkpool/music

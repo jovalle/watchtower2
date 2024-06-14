@@ -9,95 +9,10 @@ services:
       - TASKS=1
     image: ghcr.io/tecnativa/docker-socket-proxy
     ports:
-      - 127.0.0.1:2375:2375
+      - 0.0.0.0:2375:2375
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-  filebrowser:
-    container_name: filebrowser
-    env_file: .env
-    environment:
-      - FB_BASEURL=/filebrowser
-    hostname: filebrowser
-    image: hurlenko/filebrowser
-    labels:
-      - homepage.group=Tools
-      - homepage.name=File Browser
-      - homepage.icon=filebrowser
-      - homepage.href=https://finder.${DOMAIN}
-      - homepage.description=File managing interface
-      - traefik.enable=true
-      - traefik.http.routers.filebrowser.rule=host(`finder.${DOMAIN}`)
-      - traefik.http.services.filebrowser.loadbalancer.server.port=8080
-    ports:
-      - 8084:8080
-    restart: unless-stopped
-    volumes:
-      - ${MISC_PATH:-/var/lib/watchtower/misc}:/data/misc
-      - ${MOVIES_PATH:-/var/lib/watchtower/movies}:/data/movies
-      - ${MUSIC_PATH:-/var/lib/watchtower/music}:/data/music
-      - ${TVSHOWS_PATH:-/var/lib/watchtower/tvshows}:/data/tvshows
-      - /var/lib/watchtower/filebrowser:/config
-  flaresolverr:
-    container_name: flaresolverr
-    env_file: .env
-    environment:
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - LOG_HTML=${LOG_HTML:-false}
-      - CAPTCHA_SOLVER=${CAPTCHA_SOLVER:-none}
-    image: ghcr.io/flaresolverr/flaresolverr
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.flaresolverr.rule=Host(`flaresolverr.${DOMAIN}`)
-    ports:
-      - 8191:8191
-    restart: unless-stopped
-    volumes:
-      - /var/lib/watchtower/flaresolverr:/config
-  gluetun:
-    cap_add:
-      - NET_ADMIN
-    container_name: gluetun
-    env_file: .env
-    environment:
-      - OPENVPN_PASSWORD="${OPENVPN_PASSWORD}"
-      - OPENVPN_USER="${OPENVPN_USER}"
-      - SERVER_NAMES="newyork434,newyork435,newyork439,newyork440"
-      - VPN_SERVICE_PROVIDER=private internet access
-    hostname: gluetun
-    image: qmcgaw/gluetun
-    labels:
-      - homepage.group=Core
-      - homepage.name=Gluetun
-      - homepage.icon=gluetun
-      - homepage.href=https://gluetun.${DOMAIN}/v1/publicip/ip
-      - homepage.description=VPN server for containers
-      - homepage.widget.type=gluetun
-      - homepage.widget.url=http://gluetun:8000
-      - homepage.widget.fields=["public_ip", "region", "country"]
-      - traefik.enable=true
-      - traefik.http.routers.gluetun.rule=Host(`gluetun.${DOMAIN}`)
-      - traefik.http.services.gluetun.loadbalancer.server.port=8000
-    ports:
-      - 10095:10095
-      - 6881:6881
-      - 6881:6881/udp
-    restart: always
-    volumes:
-      - /dev/net/tun:/dev/net/tun
-      - /var/lib/watchtower/gluetun:/config
-  homepage:
-    container_name: homepage
-    env_file: .env
-    image: ghcr.io/gethomepage/homepage
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.homepage.rule=Host(`watchtower.${DOMAIN}`)
-    ports:
-      - 3001:3000
-    restart: unless-stopped
-    volumes:
-      - /etc/watchtower/docker/homepage:/app/config
   jellyfin:
     container_name: jellyfin
     devices:
@@ -107,7 +22,6 @@ services:
       - JELLYFIN_PublishedServerUrl=https://jellyfin.${DOMAIN}
     extra_hosts:
       - host.docker.internal:host-gateway
-    hostname: jellyfin
     image: jellyfin/jellyfin
     labels:
       - traefik.enable=true
@@ -121,63 +35,15 @@ services:
       - ${MOVIES_PATH:-/var/lib/watchtower/movies}:/data/movies
       - ${TRANSCODE_PATH:-/dev/shm}:/transcode
       - ${TVSHOWS_PATH:-/var/lib/watchtower/tvshows}:/data/tvshows
-  lidarr:
-    container_name: lidarr
-    depends_on:
-      - prowlarr
-      - qbittorrent
-    env_file: .env
-    hostname: lidarr
-    image: lscr.io/linuxserver/lidarr
-    labels:
-      - homepage.group=Media
-      - homepage.name=Lidarr
-      - homepage.icon=lidarr
-      - homepage.href=https://lidarr.${DOMAIN}
-      - homepage.description=Personal Music Curator
-      - homepage.widget.type=lidarr
-      - homepage.widget.url=http://lidarr:8686
-      - homepage.widget.key=${LIDARR_API_KEY}
-      - traefik.enable=true
-      - traefik.http.routers.lidarr.rule=Host(`lidarr.${DOMAIN}`)
-    ports:
-      - 8686:8686
-    restart: unless-stopped
-    volumes:
-      - ${DOWNLOADS_PATH:-/var/lib/watchtower/downloads}:/downloads
-      - ${MUSIC_PATH:-/var/lib/watchtower/music}:/music
-      - /var/lib/watchtower/lidarr:/config
   node-exporter:
     command: --path.rootfs=/host
     container_name: node-exporter
-    hostname: node-exporter
     image: quay.io/prometheus/node-exporter
     ports:
       - 9100:9100
     restart: unless-stopped
     volumes:
       - /:/host:ro,rslave
-  overseerr:
-    container_name: overseerr
-    env_file: .env
-    hostname: overseerr
-    image: lscr.io/linuxserver/overseerr
-    labels:
-      - homepage.group=Media
-      - homepage.name=Overseerr
-      - homepage.icon=overseerr
-      - homepage.href=https://overseerr.${DOMAIN_EXT}
-      - homepage.description=Media Server Request Management
-      - homepage.widget.type=overseerr
-      - homepage.widget.url=http://overseerr:5055
-      - homepage.widget.key=${OVERSEER_API_KEY}
-      - traefik.enable=true
-      - traefik.http.routers.overseerr.rule=Host(`overseerr.${DOMAIN}`)
-    restart: unless-stopped
-    ports:
-      - 5055:5055
-    volumes:
-      - /var/lib/watchtower/overseerr:/config
   plex:
     container_name: plex
     devices:
@@ -193,13 +59,13 @@ services:
     hostname: watchtower
     image: plexinc/pms-docker:plexpass
     labels:
-      - homepage.group=Media
+      - homepage.group=Watchtower
       - homepage.name=Plex
       - homepage.icon=plex
-      - homepage.href=https://watchtower.${DOMAIN_EXT}
+      - homepage.href=https://plex.${DOMAIN}
       - homepage.description=Media Server
       - homepage.widget.type=plex
-      - homepage.widget.url=http://${HOST_IP}:32400
+      - homepage.widget.url=http://watchtower:32400
       - homepage.widget.key=${PLEX_API_KEY}
       - homepage.widget.fields=["streams", "movies", "tv", "albums"]
       - traefik.enable=true
@@ -219,21 +85,20 @@ services:
     command: -H unix:///var/run/docker.sock
     container_name: portainer
     env_file: .env
-    hostname: portainer
     image: portainer/portainer-ce
     labels:
-      - homepage.group=Core
+      - homepage.group=Watchtower
       - homepage.name=Portainer
       - homepage.icon=portainer
-      - homepage.href=https://portainer.${DOMAIN}
+      - homepage.href=https://portainer.watchtower.${DOMAIN}
       - homepage.description=Container management
       - homepage.widget.type=portainer
       - homepage.widget.env=1
-      - homepage.widget.url=https://portainer.${DOMAIN}
+      - homepage.widget.url=http://watchtower:9000
       - homepage.widget.key=${PORTAINER_API_KEY}
       - homepage.widget.fields=["running", "stopped", "total"]
       - traefik.enable=true
-      - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)
+      - traefik.http.routers.portainer.rule=Host(`portainer.watchtower.${DOMAIN}`)
       - traefik.http.services.portainer.loadbalancer.server.port=9000
     ports:
       - 9000:9000
@@ -241,129 +106,6 @@ services:
     volumes:
       - /var/lib/watchtower/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
-  prowlarr:
-    container_name: prowlarr
-    env_file: .env
-    hostname: prowlarr
-    image: lscr.io/linuxserver/prowlarr
-    labels:
-      - homepage.group=Media
-      - homepage.name=Prowlarr
-      - homepage.icon=prowlarr
-      - homepage.href=https://prowlarr.${DOMAIN}
-      - homepage.description=*arr-based Indexer Manager
-      - homepage.widget.type=prowlarr
-      - homepage.widget.url=http://prowlarr:9696
-      - homepage.widget.key=${PROWLARR_API_KEY}
-      - traefik.enable=true
-      - traefik.http.routers.prowlarr.rule=Host(`prowlarr.${DOMAIN}`)
-    ports:
-      - 9696:9696
-    restart: unless-stopped
-    volumes:
-      - ${DOWNLOADS_PATH:-/var/lib/watchtower/downloads}:/downloads
-      - /var/lib/watchtower/prowlarr:/config
-  qbittorrent:
-    container_name: qbittorrent
-    depends_on:
-      gluetun:
-        condition: service_healthy
-    env_file: .env
-    environment:
-      - WEBUI_PORT=10095
-    image: lscr.io/linuxserver/qbittorrent
-    labels:
-      - homepage.group=Media
-      - homepage.name=qBittorrent
-      - homepage.icon=qbittorrent
-      - homepage.href=https://qbittorrent.${DOMAIN}
-      - homepage.description=BitTorrent client for ISOs
-      - homepage.widget.type=qbittorrent
-      - homepage.widget.url=http://gluetun:10095
-      - homepage.widget.username=${QBITTORRENT_USER}
-      - homepage.widget.password=${QBITTORRENT_PASSWORD}
-      - homepage.widget.fields=["download", "upload", "seed", "leech"]
-      - traefik.enable=true
-      - traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.${DOMAIN}`)
-      - traefik.http.services.qbittorrent.loadbalancer.server.port=10095
-    network_mode: "service:gluetun"
-    restart: unless-stopped
-    volumes:
-      - ${DOWNLOADS_PATH:-/var/lib/watchtower/downloads}:/downloads
-      - /var/lib/watchtower/qbittorrent:/config
-  radarr:
-    container_name: radarr
-    depends_on:
-      - prowlarr
-      - qbittorrent
-    env_file: .env
-    hostname: radarr
-    image: lscr.io/linuxserver/radarr
-    labels:
-      - homepage.group=Media
-      - homepage.name=Radarr
-      - homepage.icon=radarr
-      - homepage.href=https://radarr.${DOMAIN}
-      - homepage.description=Personal Movie Curator
-      - homepage.widget.type=radarr
-      - homepage.widget.url=http://radarr:7878
-      - homepage.widget.key=${RADARR_API_KEY}
-      - traefik.enable=true
-      - traefik.http.routers.radarr.rule=Host(`radarr.${DOMAIN}`)
-    ports:
-      - 7878:7878
-    restart: unless-stopped
-    volumes:
-      - ${DOWNLOADS_PATH:-/var/lib/watchtower/downloads}:/downloads
-      - ${MOVIES_PATH:-/var/lib/watchtower/movies}:/movies
-      - /var/lib/watchtower/radarr:/config
-  sonarr:
-    container_name: sonarr
-    depends_on:
-      - prowlarr
-      - qbittorrent
-    env_file: .env
-    hostname: sonarr
-    image: lscr.io/linuxserver/sonarr
-    labels:
-      - homepage.group=Media
-      - homepage.name=Sonarr
-      - homepage.icon=sonarr
-      - homepage.href=https://sonarr.${DOMAIN}
-      - homepage.description=Personal TV Curator
-      - homepage.widget.type=sonarr
-      - homepage.widget.url=http://sonarr:8989
-      - homepage.widget.key=${SONARR_API_KEY}
-      - traefik.enable=true
-      - traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAIN}`)
-    ports:
-      - 8989:8989
-    restart: unless-stopped
-    volumes:
-      - ${DOWNLOADS_PATH:-/var/lib/watchtower/downloads}:/downloads
-      - ${TVSHOWS_PATH:-/var/lib/watchtower/tvshows}:/tv
-      - /var/lib/watchtower/sonarr:/config
-  tautulli:
-    container_name: tautulli
-    env_file: .env
-    hostname: tautulli
-    image: lscr.io/linuxserver/tautulli
-    labels:
-      - homepage.group=Media
-      - homepage.name=Tautulli
-      - homepage.icon=tautulli
-      - homepage.href=https://tautulli.${DOMAIN}
-      - homepage.description=Media Server Companion
-      - homepage.widget.type=tautulli
-      - homepage.widget.url=http://tautulli:8181
-      - homepage.widget.key=${TAUTULLI_API_KEY}
-      - traefik.enable=true
-      - traefik.http.routers.tautulli.rule=Host(`tautulli.${DOMAIN}`)
-    ports:
-      - 8181:8181
-    restart: unless-stopped
-    volumes:
-      - /var/lib/watchtower/tautulli:/config
   traefik:
     command:
       - --api.dashboard=true
@@ -379,7 +121,7 @@ services:
       - --entrypoints.websecure.http.tls=true
       - --entrypoints.websecure.http.tls.certResolver=letsencrypt
       - --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN}
-      - --entrypoints.websecure.http.tls.domains[0].sans=*.${DOMAIN},*.${DOMAIN}
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.watchtower.${DOMAIN},*.${DOMAIN}
       - --log.level=DEBUG
       - --providers.docker.exposedbydefault=true
       - --providers.docker=true
@@ -388,18 +130,17 @@ services:
     env_file: .env
     extra_hosts:
       - host.docker.internal:172.17.0.1
-    hostname: traefik
     image: traefik
     labels:
-      - homepage.group=Core
+      - homepage.group=Watchtower
       - homepage.name=Traefik
       - homepage.icon=traefik
-      - homepage.href=https://traefik.${DOMAIN}
+      - homepage.href=https://traefik.watchtower.${DOMAIN}
       - homepage.description=Reverse proxy for exposing apps via HTTPS
       - homepage.widget.type=traefik
-      - homepage.widget.url=http://traefik:8080
+      - homepage.widget.url=http://watchtower:8080
       - traefik.enable=true
-      - traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)
+      - traefik.http.routers.dashboard.rule=Host(`traefik.watchtower.${DOMAIN}`)
       - traefik.http.routers.dashboard.tls=true
       - traefik.http.routers.dashboard.entrypoints=websecure
       - traefik.http.routers.dashboard.service=api@internal
@@ -413,34 +154,8 @@ services:
     volumes:
       - /var/lib/watchtower/letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
-  unpackerr:
-    image: golift/unpackerr
-    container_name: unpackerr
-    env_file: .env
-    environment:
-      # General config
-      - UN_DEBUG=false
-      - UN_INTERVAL=2m
-      - UN_START_DELAY=1m
-      - UN_RETRY_DELAY=5m
-      - UN_MAX_RETRIES=3
-      - UN_PARALLEL=1
-      - UN_FILE_MODE=0644
-      - UN_DIR_MODE=0755
-      # Folder Config
-      - UN_FOLDER_0_PATH=/downloads
-      - UN_FOLDER_0_EXTRACT_PATH=/downloads
-      - UN_FOLDER_0_DELETE_AFTER=10m
-      - UN_FOLDER_0_DELETE_ORIGINAL=false
-      - UN_FOLDER_0_DELETE_FILES=false
-      - UN_FOLDER_0_MOVE_BACK=false
-    ports:
-      - 5656:5656
-    restart: unless-stopped
-    volumes:
-      - ${DOWNLOADS_PATH:-/var/lib/watchtower/downloads}:/downloads
-  watchtower:
-    container_name: watchtower
+  watchtowerr:
+    container_name: watchtowerr
     env_file: .env
     environment:
       WATCHTOWER_SCHEDULE: "0 0 4 * * *"
