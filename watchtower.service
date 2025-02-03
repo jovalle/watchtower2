@@ -2,8 +2,8 @@
 
 [Unit]
 Description=Watchtower Composition
-Requires=docker.service
-After=docker.service
+Requires=docker.service media.mount
+After=docker.service media.mount
 
 [Service]
 Type=simple
