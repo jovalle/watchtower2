@@ -35,16 +35,17 @@ services:
       - homepage.widget.type=jellyfin
       - homepage.widget.url=http://watchtower:8096
       - traefik.enable=true
-      - traefik.http.routers.jellyfin.rule=host(`jellyfin.${DOMAIN}`)
+      - traefik.http.routers.jellyfin.rule=host(`jellyfin.watchtower.${DOMAIN}`)
       - traefik.http.services.jellyfin.loadbalancer.server.port=8096
+      - traefik.http.services.jellyfin.loadbalancer.server.url=http://127.0.0.1:8096
     network_mode: host
     restart: unless-stopped
     volumes:
-      - /var/lib/watchtower/jellyfin:/config
-      - ${MISC_PATH:-/var/lib/watchtower/misc}:/data/misc
-      - ${MOVIES_PATH:-/var/lib/watchtower/movies}:/data/movies
+      - ${CONFIG_PATH-/var/lib/watchtower}/jellyfin:/config
+      - ${MISC_PATH:-/var/lib/watchtower/misc}:/misc
+      - ${MOVIES_PATH:-/var/lib/watchtower/movies}:/movies
       - ${TRANSCODE_PATH:-/dev/shm}:/transcode
-      - ${TVSHOWS_PATH:-/var/lib/watchtower/tvshows}:/data/tvshows
+      - ${SERIES_PATH:-/var/lib/watchtower/series}:/series
   node-exporter:
     command: --path.rootfs=/host
     container_name: node-exporter
@@ -62,14 +63,12 @@ services:
     environment:
       - ADVERTISE_IP=http://${HOST_IP:?host ip required}:32400/
       - PLEX_CLAIM=${PLEX_CLAIM:-claim-1234}
-      - PLEX_GID=${PGID:-1000}
-      - PLEX_UID=${PUID:-1000}
       - UMASK_SET=022
       - VERSION=plexpass
     hostname: watchtower
     image: plexinc/pms-docker:plexpass
     labels:
-      - homepage.group=Watchtower
+      - homepage.group=Media
       - homepage.name=Plex
       - homepage.icon=plex
       - homepage.href=https://plex.${DOMAIN}
@@ -85,12 +84,12 @@ services:
     network_mode: host
     restart: unless-stopped
     volumes:
-      - ${CONFIG_PATH:-/var/lib/watchtower/plex}:/config
-      - ${MISC_PATH:-/var/lib/watchtower/misc}:/data/misc
-      - ${MOVIES_PATH:-/var/lib/watchtower/movies}:/data/movies
-      - ${MUSIC_PATH:-/var/lib/watchtower/music}:/data/music
+      - ${CONFIG_PATH:-/var/lib/watchtower}/plex:/config
+      - ${MISC_PATH:-/var/lib/watchtower/misc}:/misc
+      - ${MOVIES_PATH:-/var/lib/watchtower/movies}:/movies
+      - ${MUSIC_PATH:-/var/lib/watchtower/music}:/music
+      - ${SERIES_PATH:-/var/lib/watchtower/series}:/series
       - ${TRANSCODE_PATH:-/var/lib/watchtower/transcode}:/transcode
-      - ${TVSHOWS_PATH:-/var/lib/watchtower/tvshows}:/data/tvshows
   portainer:
     command: -H unix:///var/run/docker.sock
     container_name: portainer
@@ -114,7 +113,7 @@ services:
       - 9000:9000
     restart: unless-stopped
     volumes:
-      - /var/lib/watchtower/portainer:/data
+      - ${CONFIG_PATH:-/var/lib/watchtower}/portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
   traefik:
     command:
@@ -162,15 +161,15 @@ services:
       - 443:443
     restart: unless-stopped
     volumes:
-      - /var/lib/watchtower/letsencrypt:/letsencrypt
+      - ${CONFIG_PATH-/var/lib/watchtower}/letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
   watchtowerr:
     container_name: watchtowerr
     env_file: .env
     environment:
-      WATCHTOWER_SCHEDULE: "0 0 4 * * *"
       WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_DEBUG: "true"
+      WATCHTOWER_SCHEDULE: "0 0 4 * * *"
     image: containrrr/watchtower
     restart: unless-stopped
     volumes:
