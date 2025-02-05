@@ -24,6 +24,16 @@ services:
       - host.docker.internal:host-gateway
     image: jellyfin/jellyfin
     labels:
+      - homepage.description=Media Server
+      - homepage.group=Media
+      - homepage.href=https://jellyfin.watchtower.${DOMAIN}
+      - homepage.icon=jellyfin
+      - homepage.name=Jellyfin
+      - homepage.widget.enablbeNowPlaying=true
+      - homepage.widget.key=${JELLYFIN_API_KEY}
+      - homepage.widget.streamOneStreamToTwoRows=true
+      - homepage.widget.type=jellyfin
+      - homepage.widget.url=http://watchtower:8096
       - traefik.enable=true
       - traefik.http.routers.jellyfin.rule=host(`jellyfin.${DOMAIN}`)
       - traefik.http.services.jellyfin.loadbalancer.server.port=8096
